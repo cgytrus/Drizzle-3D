@@ -25,7 +25,7 @@ public sealed class LingoCastLib
         _runtime = runtime;
         Offset = offset;
 
-        _cast = new CastMember[1000];
+        _cast = new CastMember[2000];
         for (var i = 0; i < _cast.Length; i++)
         {
             _cast[i] = new CastMember(runtime, this, i + 1 + Offset, name);
