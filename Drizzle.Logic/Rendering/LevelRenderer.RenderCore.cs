@@ -9,6 +9,8 @@ using Drizzle.Ported;
 using Serilog;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Png;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
 
 namespace Drizzle.Logic.Rendering;
 
@@ -57,21 +59,44 @@ public sealed partial class LevelRenderer
                 RenderFinished();
 
                 RenderStartFrame(RenderStage.SaveFile);
-                // Save image.
-                var fileName = Path.Combine(
-                    LingoRuntime.MovieBasePath,
-                    "Levels",
-                    $"{Movie.gLoadedName}_{camIndex}.png");
 
-                using var file = File.Create(fileName);
-                var image = _runtime.GetCastMember("finalImage")!.image!;
-                OnScreenRenderCompleted?.Invoke(camIndex, image);
+                Image<Bgra32> bigImage = new(1400, 800 * 30);
+                for (int i = -1; i < 30; i++) {
+                    var fileName = Path.Combine(
+                        LingoRuntime.MovieBasePath,
+                        "Levels",
+                        $"{Movie.gLoadedName}_{camIndex}{(i < 0 ? "" : $"_{i}")}.png"
+                    );
+                    using var file = File.Create(fileName);
 
-                // Save the image
-                var imgSharp = image.GetImgSharpImage();
-                imgSharp.Metadata.GetPngMetadata().TextData.Add(
-                    new PngTextData("Software", PngSoftwareName, null, null));
-                imgSharp.SaveAsPng(file);
+                    var imgSharp = _runtime.GetCastMember("finalImage" + (i < 0 ? "" : i))!.image!
+                        .GetImgSharpImage();
+                    imgSharp.Metadata.GetPngMetadata().TextData.Add(
+                        new PngTextData("Software", PngSoftwareName, null, null)
+                    );
+                    imgSharp.SaveAsPng(file);
+
+                    if (i < 0)
+                        continue;
+
+                    int i1 = i;
+                    bigImage.Mutate(x => {
+                        x.DrawImage(imgSharp, new Point(0, 800 * i1), 1f);
+                    });
+                }
+                {
+                    using var bigFile = File.Create(Path.Combine(
+                        LingoRuntime.MovieBasePath,
+                        "Levels",
+                        $"{Movie.gLoadedName}_{camIndex}_3D.png"
+                    ));
+                    bigImage.Metadata.GetPngMetadata().TextData.Add(
+                        new PngTextData("Software", PngSoftwareName, null, null)
+                    );
+                    bigImage.SaveAsPng(bigFile);
+                }
+
+                OnScreenRenderCompleted?.Invoke(camIndex, _runtime.GetCastMember("finalImage")!.image!);
 
                 _countCamerasDone += 1;
             }
@@ -293,10 +318,14 @@ public sealed partial class LevelRenderer
         if (!oldRenderColors)
         {
             Log.Debug("Using new RenderColors");
-            while (Movie.keepLooping == 1)
-            {
-                RenderStartFrame(RenderStage.RenderColors);
-                RenderColorsNewFrame();
+            for (int i = -1; i < 30; i++) {
+                Movie.c = 1;
+                Movie.keepLooping = 1;
+                while (Movie.keepLooping == 1)
+                {
+                    RenderStartFrame(RenderStage.RenderColors);
+                    RenderColorsNewFrame(i);
+                }
             }
         }
         else

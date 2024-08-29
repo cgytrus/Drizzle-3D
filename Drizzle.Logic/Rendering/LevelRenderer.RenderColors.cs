@@ -17,16 +17,16 @@ public sealed partial class LevelRenderer
         (-1, 1)
     };
 
-    public void RenderColorsNewFrame()
+    public void RenderColorsNewFrame(int i)
     {
-        var finalImage = _runtime.GetCastMember("finalImage")!.image!;
-        var dpImage = _runtime.GetCastMember("dpImage")!.image!;
-        var fogImage = _runtime.GetCastMember("fogImage")!.image!;
-        var shadowImage = _runtime.GetCastMember("shadowImage")!.image!;
-        var rainBowMask = _runtime.GetCastMember("rainBowMask")!.image!;
-        var flattenedGradientA = _runtime.GetCastMember("flattenedGradientA")!.image!;
-        var flattenedGradientB = _runtime.GetCastMember("flattenedGradientB")!.image!;
-        var finalDecalImage = _runtime.GetCastMember("finalDecalImage")!.image!;
+        var finalImage = _runtime.GetCastMember("finalImage" + (i < 0 ? "" : i))!.image!;
+        var dpImage = _runtime.GetCastMember("dpImage" + (i < 0 ? "" : i))!.image!;
+        var fogImage = _runtime.GetCastMember("fogImage" + (i < 0 ? "" : i))!.image!;
+        var shadowImage = _runtime.GetCastMember("shadowImage" + (i < 0 ? "" : i))!.image!;
+        var rainBowMask = _runtime.GetCastMember("rainBowMask" + (i < 0 ? "" : i))!.image!;
+        var flattenedGradientA = _runtime.GetCastMember("flattenedGradientA" + (i < 0 ? "" : i))!.image!;
+        var flattenedGradientB = _runtime.GetCastMember("flattenedGradientB" + (i < 0 ? "" : i))!.image!;
+        var finalDecalImage = _runtime.GetCastMember("finalDecalImage" + (i < 0 ? "" : i))!.image!;
 
         var gAnyDecals = Movie.gAnyDecals > 0;
         var dptsL = (LingoList)Movie.dptsL;
